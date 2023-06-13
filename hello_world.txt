@@ -1,1 +1,35 @@
 hello, world
+
+
+# Split the data into sections
+sections = re.split(r'\n(?=[A-Z ]+\n)', data.strip())
+
+# Create a dictionary to store sections by name
+section_dict = {}
+
+# Populate the dictionary with sections
+current_section_name = ''
+for section in sections:
+    header_match = re.search(r'^([A-Z ]+)$', section, re.MULTILINE)
+    if header_match:
+        current_section_name = header_match.group(1).strip()
+        section_dict[current_section_name] = ''
+    else:
+        section_dict[current_section_name] += section
+
+# Find "(N) Name: ABC" in the RECEIVE subsection of MOD section
+mod_section = section_dict.get("MOD")
+if mod_section:
+    receive_subsection_match = re.search(r'RECEIVE([\s\S]*?)RANGE', mod_section, re.DOTALL)
+    if receive_subsection_match:
+        receive_subsection = receive_subsection_match.group(1)
+        match = re.search(r'\(N\) Name: ABC', receive_subsection)
+        if match:
+            print(match.group(0))
+
+# Find "(N) Name: ABC" in the standalone RECEIVE section
+standalone_receive_section = section_dict.get("RECEIVE")
+if standalone_receive_section:
+    match = re.search(r'\(N\) Name: ABC', standalone_receive_section)
+    if match:
+        print(match.group(0))
